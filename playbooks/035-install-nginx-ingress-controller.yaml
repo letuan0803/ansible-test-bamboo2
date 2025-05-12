@@ -38,4 +38,4 @@
               httpPort:
                 nodePort: 30080
               httpsPort:
-                enabled: false
+                enable: false
