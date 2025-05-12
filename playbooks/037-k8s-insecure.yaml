@@ -17,13 +17,13 @@
 
     - name: Remove existing empty registry.mirrors block
       lineinfile:
-        path: /etc/containerd/config.toml
+        path: /etc/containerd/config2.toml
         regexp: '^\[plugins\."io\.containerd\.grpc\.v1\.cri"\.registry\.mirrors\]$'
         state: absent
 
     - name: Insert updated registry.mirrors block
       blockinfile:
-        path: /etc/containerd/config.toml
+        path: /etc/containerd/config2.toml
         insertafter: '^\[plugins\."io\.containerd\.grpc\.v1\.cri"\.registry\.headers\]'
         marker: ""
         block: |
