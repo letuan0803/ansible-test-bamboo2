@@ -2,17 +2,18 @@
 #sre-vm-nlb ansible_host=10.0.1.157
 
 [mnt]
-mnt-vm ansible_host=10.0.1.10
+management-vm ansible_host=10.0.1.10
 
 [k8s_master]
-k8s-master-vm-01 ansible_host=10.0.129.10
+k8s-master-vm-01 ansible_host=10.0.2.11
 
 [k8s_worker]
-k8s-worker-vm-01 ansible_host=10.0.129.11
-k8s-worker-vm-02 ansible_host=10.0.129.12
+k8s-worker-vm-01 ansible_host=10.0.2.11
+k8s-worker-vm-02 ansible_host=10.0.2.12
 
-[harbor]
-harbor-vm ansible_host=10.0.1.12
+[mysql]
+mysql-vm-01 ansible_host=10.0.3.10
+mysql-vm-02 ansible_host=10.0.3.11
 
 [all:vars]
 ansible_user=ubuntu
