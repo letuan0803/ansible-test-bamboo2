@@ -1,8 +1,8 @@
 #[nlb]
 #sre-vm-nlb ansible_host=10.0.1.157
 
-[mnt]
-management-vm ansible_host=10.0.1.10
+#[mnt]
+#management-vm ansible_host=10.0.1.10
 
 [k8s_master]
 k8s-master-vm-01 ansible_host=10.0.2.11
