@@ -1,0 +1,10 @@
+helm repo add bamboo http://172.16.204.150/chartrepo/bamboo
+helm repo update
+helm pull bamboo/hcsn-bamboo-db
+helm install hcsn-bamboo-db bamboo/hcsn-bamboo-db -f ./hcsn-bamboo-db/values.TestInternet.db.yaml
+
+kubectl create namespace hcsn-bamboo
+
+[plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."172.16.204.150"]
+    endpoint = ["http://172.16.204.150"]

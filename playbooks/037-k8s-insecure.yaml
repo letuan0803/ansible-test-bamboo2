@@ -1,0 +1,21 @@
+---
+- name: Add insecure registry to containerd config
+  hosts: k8s_worker
+  become: true
+  tasks:
+    - name: Ensure /etc/containerd/config.toml exists
+      command: containerd config default > /etc/containerd/config2.toml
+      args:
+        creates: /etc/containerd/config.toml
+
+    - name: Add insecure registry to /etc/containerd/config.toml
+      lineinfile:
+        path: /etc/containerd/config2.toml
+        regexp: '^\s*\[plugins\.\"io\.containerd\.grpc\.v1\.cri\"\]\s*$'
+        insertafter: '^\s*\[plugins\.\"io\.containerd\.grpc\.v1\.cri\"\]\s*$'
+        line: '      [plugins."io.containerd.grpc.v1.cri".registry.mirrors."172.16.204.150"]\n        endpoint = ["http://172.16.204.150"]'
+
+    # - name: Restart containerd service
+    #   service:
+    #     name: containerd
+    #     state: restarted
