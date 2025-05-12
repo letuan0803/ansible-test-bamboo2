@@ -34,7 +34,7 @@
             replicaCount: 2
             service:
               type: NodePort
-              externalTrafficPolicy: Cluster
+              externalTrafficPolicy: Local
               httpPort:
                 nodePort: 30080
               httpsPort:
