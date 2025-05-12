@@ -2,7 +2,37 @@
 - name: Install Helm on Kubernetes Master
   hosts: k8s_master
   become: true
+  gather_facts: false
+  vars:
+    ansible_python_interpreter: /usr/bin/python3.10
+    pip_path: /usr/local/bin/pip3.10
+
   tasks:
+    - name: Ensure required apt packages are installed
+      apt:
+        name:
+          - curl
+          - python3.10-venv
+          - python3.10-distutils
+        state: present
+        update_cache: true
+
+    - name: Check if pip3.10 is already installed
+      stat:
+        path: "{{ pip_path }}"
+      register: pip_stat
+
+    - name: Install pip for Python 3.10 if not present
+      shell: |
+        curl -sS https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
+        /usr/bin/python3.10 /tmp/get-pip.py
+      when: not pip_stat.stat.exists
+
+    - name: Ensure kubernetes Python module is installed
+      pip:
+        name: kubernetes
+        executable: "{{ pip_path }}"
+  
     # Download Helm binary
     - name: Download Helm binary
       get_url:

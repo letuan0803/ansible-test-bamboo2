@@ -28,6 +28,13 @@
         group: ubuntu
         mode: '0644'
 
+    - name: Copy kubeconfig to Ansible host
+      fetch:
+        src: /home/ubuntu/.kube/config
+        dest: ~/.kube/config
+        flat: yes
+        mode: '0644'
+
     - name: Wait for 20 seconds
       pause:
         seconds: 20
