@@ -3,6 +3,12 @@
   hosts: k8s_worker
   become: true
   tasks:
+    # Generate default containerd configuration
+    - name: Generate default containerd configuration
+      command: containerd config default
+      register: containerd_config
+      changed_when: false
+
     # Write containerd configuration to file
     - name: Write containerd configuration to file
       copy:
