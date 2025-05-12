@@ -6,14 +6,13 @@
     - name: Copy config.toml.j2 to /etc/containerd/config.toml
       ansible.builtin.template:
         src: "../templates/config.toml.j2"
-        dest: /etc/containerd/config2.toml
+        dest: /etc/containerd/config.toml
         owner: root
         group: root
         mode: '0644'
       vars:
         registry_mirror_address: "172.16.204.150"
-
-    # - name: Restart containerd service
-    #   service:
-    #     name: containerd
-    #     state: restarted
+    - name: Restart containerd service
+      service:
+        name: containerd
+        state: restarted
