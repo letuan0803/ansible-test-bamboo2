@@ -3,23 +3,27 @@
   hosts: k8s_worker
   become: true
   tasks:
-    # Generate default containerd configuration
     - name: Generate default containerd configuration
       command: containerd config default
       register: containerd_config
       changed_when: false
 
-    # Write containerd configuration to file
     - name: Write containerd configuration to file
       copy:
         content: "{{ containerd_config.stdout }}"
         dest: /etc/containerd/config2.toml
 
-    # Write containerd configuration to file
-    - name: Replace registry mirrors block in containerd config
+    - name: Remove default empty registry.mirrors block
+      lineinfile:
+        path: /etc/containerd/config2.toml
+        regexp: '^\[plugins\."io\.containerd\.grpc\.v1\.cri"\.registry\.mirrors\]$'
+        state: absent
+
+    - name: Append registry mirrors block at the end
       blockinfile:
         path: /etc/containerd/config2.toml
         marker: "# {mark} ANSIBLE MANAGED BLOCK FOR REGISTRY MIRRORS"
+        insertafter: EOF
         block: |
           [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
             [plugins."io.containerd.grpc.v1.cri".registry.mirrors."172.16.204.150"]
