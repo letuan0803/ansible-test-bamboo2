@@ -1,0 +1,47 @@
+- name: Format, label, and mount disk
+  hosts: target_servers
+  become: true
+  vars:
+    device: /dev/vdb
+    label: data
+    mount_point: /mnt/data
+    filesystem: ext4
+    user: ubuntu
+
+  tasks:
+    - name: Check if device is already formatted
+      command: blkid {{ device }}
+      register: blkid_output
+      changed_when: false
+      failed_when: false
+
+    - name: Format the disk (if not already)
+      filesystem:
+        fstype: "{{ filesystem }}"
+        dev: "{{ device }}"
+      when: filesystem not in blkid_output.stdout
+
+    - name: Set filesystem label (no module, using command)
+      command: e2label {{ device }} {{ label }}
+
+    - name: Create mount point directory
+      file:
+        path: "{{ mount_point }}"
+        state: directory
+        mode: '0755'
+
+    - name: Mount the disk and ensure fstab entry
+      mount:
+        path: "{{ mount_point }}"
+        src: "LABEL={{ label }}"
+        fstype: "{{ filesystem }}"
+        opts: defaults
+        state: mounted
+
+    - name: Set permissions on the mount point
+      file:
+        path: "{{ mount_point }}"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: '0755'
+        recurse: yes
