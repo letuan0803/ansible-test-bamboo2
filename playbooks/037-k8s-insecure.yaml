@@ -15,14 +15,15 @@
         content: "{{ containerd_config.stdout }}"
         dest: /etc/containerd/config2.toml
 
-    - name: Replace registry mirrors block in containerd config
-      blockinfile:
+    - name: Replace registry mirrors block in containerd config.toml
+      replace:
         path: /etc/containerd/config.toml
-        marker: "# {mark} ANSIBLE MANAGED BLOCK FOR REGISTRY MIRRORS"
-        block: |
-                [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
-                  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."172.16.204.150"]
-                    endpoint = ["http://172.16.204.150"]
+        regexp: '^\[plugins\."io\.containerd\.grpc\.v1\.cri"\.registry\.mirrors\][\s\S]*?(?=^\[|\Z)'
+        replace: |
+          [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+            [plugins."io.containerd.grpc.v1.cri".registry.mirrors."172.16.204.150"]
+              endpoint = ["http://172.16.204.150"]
+
 
     # - name: Restart containerd service
     #   service:
