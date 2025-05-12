@@ -2,16 +2,16 @@
 - name: Add insecure registry to containerd config
   hosts: k8s_worker
   become: true
-  vars:
-    registry_mirror_address: "172.16.204.150"
   tasks:
     - name: Copy config.toml.j2 to /etc/containerd/config.toml
-      copy:
-        src: "../files/config.toml.j2"
+      ansible.builtin.template:
+        src: "../templates/config.toml.j2"
         dest: /etc/containerd/config2.toml
         owner: root
         group: root
         mode: '0644'
+      vars:
+        registry_mirror_address: "172.16.204.150"
 
     # - name: Restart containerd service
     #   service:
