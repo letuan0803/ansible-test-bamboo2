@@ -3,10 +3,11 @@
   hosts: k8s_worker
   become: true
   tasks:
-    - name: Ensure /etc/containerd/config.toml exists
-      command: containerd config default > /etc/containerd/config2.toml
-      args:
-        creates: /etc/containerd/config.toml
+    # Write containerd configuration to file
+    - name: Write containerd configuration to file
+      copy:
+        content: "{{ containerd_config.stdout }}"
+        dest: /etc/containerd/config2.toml
 
     - name: Add insecure registry to /etc/containerd/config.toml
       lineinfile:
