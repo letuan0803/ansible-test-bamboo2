@@ -6,6 +6,7 @@
   vars:
     mysql_user: bamboo
     mysql_password: "12345678@Abc"
+    ansible_python_interpreter: /usr/bin/python3
 
   tasks:
 
@@ -18,6 +19,12 @@
     - name: Install MySQL Python library
       apt:
         name: python3-mysqldb
+        state: present
+        update_cache: yes
+
+    - name: Ensure PyMySQL is installed
+      apt:
+        name: python3-pymysql
         state: present
         update_cache: yes
 
