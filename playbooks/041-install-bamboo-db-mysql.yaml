@@ -15,6 +15,12 @@
         state: present
         update_cache: yes
 
+    - name: Install MySQL Python library
+      apt:
+        name: python3-mysqldb
+        state: present
+        update_cache: yes
+
     - name: Ensure MySQL is started and enabled
       service:
         name: mysql
