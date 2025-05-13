@@ -49,7 +49,7 @@
         priv: '*.*:ALL,GRANT'
         state: present
         login_user: root
-        login_password:
+        login_password: ""
 
     # - name: Remove anonymous users
     #   mysql_user:
