@@ -1,0 +1,54 @@
+---
+- name: Install and configure MySQL
+  hosts: mysql
+  become: true
+
+  vars:
+    mysql_user: bamboo
+    mysql_password: "12345678@Abc"
+
+  tasks:
+
+    - name: Install MySQL server
+      apt:
+        name: mysql-server
+        state: present
+        update_cache: yes
+
+    - name: Ensure MySQL is started and enabled
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Set bind-address to 0.0.0.0
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+        notify: Restart MySQL
+
+    - name: Create MySQL user with remote access
+      mysql_user:
+        name: "{{ mysql_user }}"
+        password: "{{ mysql_password }}"
+        host: '%'
+        priv: '*.*:ALL,GRANT'
+        state: present
+
+    - name: Remove anonymous users
+      mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+
+    - name: Remove test database
+      mysql_db:
+        name: test
+        state: absent
+
+  handlers:
+    - name: Restart MySQL
+      service:
+        name: mysql
+        state: restarted
