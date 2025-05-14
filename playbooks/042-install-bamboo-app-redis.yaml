@@ -1,0 +1,32 @@
+---
+- name: Install and configure Redis (no password, bind 0.0.0.0)
+  hosts: redis
+  become: true
+
+  tasks:
+    - name: Install Redis
+      apt:
+        name: redis-server
+        state: present
+        update_cache: yes
+
+    - name: Configure Redis to listen on all interfaces and no password
+      lineinfile:
+        path: /etc/redis/redis.conf
+        regexp: '^bind '
+        line: 'bind 0.0.0.0'
+        state: present
+        backup: yes
+
+    - name: Ensure 'requirepass' is commented out (no password)
+      lineinfile:
+        path: /etc/redis/redis.conf
+        regexp: '^requirepass'
+        state: absent
+        backup: yes
+
+    - name: Ensure Redis is enabled and started
+      systemd:
+        name: redis-server
+        enabled: yes
+        state: restarted

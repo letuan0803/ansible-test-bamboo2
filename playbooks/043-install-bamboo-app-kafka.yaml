@@ -1,0 +1,92 @@
+---
+- name: Install and configure Apache Kafka
+  hosts: kafka
+  become: true
+
+  vars:
+    kafka_version: "3.7.0"
+    scala_version: "2.13"
+    kafka_install_dir: /opt/kafka
+    kafka_user: kafka
+
+  tasks:
+    - name: Install Java (OpenJDK 11)
+      apt:
+        name: openjdk-11-jdk
+        state: present
+        update_cache: yes
+
+    - name: Create kafka user
+      user:
+        name: "{{ kafka_user }}"
+        shell: /bin/bash
+        create_home: yes
+        system: yes
+
+    - name: Download Kafka binaries
+      get_url:
+        url: "https://downloads.apache.org/kafka/{{ kafka_version }}/kafka_{{ scala_version }}-{{ kafka_version }}.tgz"
+        dest: /tmp/kafka.tgz
+        mode: '0644'
+
+    - name: Create Kafka installation directory
+      file:
+        path: "{{ kafka_install_dir }}"
+        state: directory
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_user }}"
+
+    - name: Extract Kafka binaries
+      unarchive:
+        src: /tmp/kafka.tgz
+        dest: "{{ kafka_install_dir }}"
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_user }}"
+
+    - name: Ensure Kafka data directory exists
+      file:
+        path: "{{ kafka_install_dir }}/data"
+        state: directory
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_user }}"
+
+    - name: Configure Kafka to use the data directory
+      lineinfile:
+        path: "{{ kafka_install_dir }}/config/server.properties"
+        regexp: '^log.dirs='
+        line: "log.dirs={{ kafka_install_dir }}/data"
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_user }}"
+
+    - name: Create systemd unit file for Kafka
+      copy:
+        dest: /etc/systemd/system/kafka.service
+        content: |
+          [Unit]
+          Description=Apache Kafka Server
+          After=network.target
+
+          [Service]
+          Type=simple
+          User={{ kafka_user }}
+          ExecStart={{ kafka_install_dir }}/bin/kafka-server-start.sh {{ kafka_install_dir }}/config/server.properties
+          ExecStop={{ kafka_install_dir }}/bin/kafka-server-stop.sh
+          Restart=on-abnormal
+
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start Kafka service
+      systemd:
+        name: kafka
+        enabled: yes
+        state: started
