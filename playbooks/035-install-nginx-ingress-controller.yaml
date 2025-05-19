@@ -31,7 +31,7 @@
         create_namespace: false
         values:
           controller:
-            replicaCount: 1
+            replicaCount: 3
             service:
               type: NodePort
               externalTrafficPolicy: Cluster
