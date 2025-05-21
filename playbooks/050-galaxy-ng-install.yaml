@@ -37,7 +37,7 @@
       register: git_update
 
     - name: Manage galaxy_ng containers
-      docker_compose_v2:
+      community.docker.docker_compose_v2:
         project_src: "{{ galaxy_repo_path }}/dev/compose"
         files:
           - standalone.yaml
