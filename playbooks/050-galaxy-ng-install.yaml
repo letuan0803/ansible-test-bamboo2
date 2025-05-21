@@ -1,0 +1,4 @@
+- hosts: galaxy-ng
+  become: true
+  roles:
+    - roles/docker
