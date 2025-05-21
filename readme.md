@@ -14,6 +14,8 @@ copy
 ## install collection
 
 ansible-galaxy collection install kubernetes.core
+ansible-galaxy collection install community.general
+
 
 ## loging
 

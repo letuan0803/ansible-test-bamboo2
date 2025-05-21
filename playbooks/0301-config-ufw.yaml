@@ -1,0 +1,30 @@
+- name: Configure UFW using the Ansible module
+  hosts: k8s_master,k8s_worker
+  become: true
+  collections:
+    - community.general
+  tasks:
+    - name: Set default policies
+      community.general.ufw:
+        direction: incoming
+        policy: allow
+
+    - name: Set outgoing policy
+      community.general.ufw:
+        direction: outgoing
+        policy: allow
+
+    - name: Set routed policy
+      community.general.ufw:
+        direction: routed
+        policy: deny
+
+    - name: Allow SSH
+      community.general.ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
