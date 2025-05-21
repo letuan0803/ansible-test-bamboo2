@@ -36,29 +36,18 @@
       when: repo_stat.stat.exists
       register: git_update
 
-    - name: Get existing containers state
-      command: docker compose -f {{ galaxy_compose_file }} ps -q
-      register: existing_containers
-      changed_when: false
-      ignore_errors: true
-
-    - name: Stop existing containers if running
-      command: docker compose -f {{ galaxy_compose_file }} down
-      when: existing_containers.stdout != ""
-      ignore_errors: true
-
-    - name: Start galaxy_ng containers
-      docker_compose:
+    - name: Manage galaxy_ng containers
+      docker_compose_v2:
         project_src: "{{ galaxy_repo_path }}/dev/compose"
         files:
           - standalone.yaml
         state: present
-        pull: yes
-        remove_orphans: yes
+        pull: true
+        remove_orphans: true
       register: compose_result
 
-    - name: Print container status
-      debug:
-        msg: "Container {{ item.name }} is {{ item.state }}"
+    - name: Show containers status
+      ansible.builtin.debug:
+        msg: "Service {{ item.key }} {{ 'is created' if item.value.state == 'present' else 'has an issue' }}"
       loop: "{{ compose_result.services | dict2items }}"
       when: compose_result.services is defined
