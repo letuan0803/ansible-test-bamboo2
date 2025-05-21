@@ -1,4 +1,64 @@
+---
 - hosts: galaxy-ng
   become: true
+  vars:
+    galaxy_repo_path: "/opt/galaxy_ng"
+    galaxy_compose_file: "{{ galaxy_repo_path }}/dev/compose/standalone.yaml"
+
   roles:
     - roles/docker
+
+  tasks:
+    - name: Install git package
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+
+    - name: Check if galaxy_ng repository exists
+      stat:
+        path: "{{ galaxy_repo_path }}"
+      register: repo_stat
+
+    - name: Clone galaxy_ng repository if not exists
+      git:
+        repo: https://github.com/ansible/galaxy_ng
+        dest: "{{ galaxy_repo_path }}"
+        version: master
+      when: not repo_stat.stat.exists
+
+    - name: Update galaxy_ng repository if exists
+      git:
+        repo: https://github.com/ansible/galaxy_ng
+        dest: "{{ galaxy_repo_path }}"
+        version: master
+        update: yes
+      when: repo_stat.stat.exists
+      register: git_update
+
+    - name: Get existing containers state
+      command: docker compose -f {{ galaxy_compose_file }} ps -q
+      register: existing_containers
+      changed_when: false
+      ignore_errors: true
+
+    - name: Stop existing containers if running
+      command: docker compose -f {{ galaxy_compose_file }} down
+      when: existing_containers.stdout != ""
+      ignore_errors: true
+
+    - name: Start galaxy_ng containers
+      docker_compose:
+        project_src: "{{ galaxy_repo_path }}/dev/compose"
+        files:
+          - standalone.yaml
+        state: present
+        pull: yes
+        remove_orphans: yes
+      register: compose_result
+
+    - name: Print container status
+      debug:
+        msg: "Container {{ item.name }} is {{ item.state }}"
+      loop: "{{ compose_result.services | dict2items }}"
+      when: compose_result.services is defined
