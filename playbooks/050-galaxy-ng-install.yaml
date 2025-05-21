@@ -5,6 +5,11 @@
     galaxy_repo_path: "/opt/galaxy_ng"
     galaxy_compose_file: "{{ galaxy_repo_path }}/dev/compose/standalone.yaml"
 
+  pre_tasks:
+    - name: Install community.docker collection
+      ansible.builtin.command:
+        cmd: ansible-galaxy collection install community.docker
+
   roles:
     - roles/docker
 
@@ -42,7 +47,7 @@
         files:
           - standalone.yaml
         state: present
-        pull: true
+        pull: "missing"
         remove_orphans: true
       register: compose_result
 
